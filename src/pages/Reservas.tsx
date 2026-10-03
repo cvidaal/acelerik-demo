@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import { Layout } from "@/components/Layout";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -101,18 +102,18 @@ export default function Reservas() {
 
   const handleChangeEstado = async (id: string, estado: EstadoReserva) => {
     try {
-      await updateReserva(id, {
+      const updated = await updateReserva(id, {
         estado,
-        pagado: estado === "COMPLETADO",
+        
       });
 
       setSelectedReserva((prev) =>
         prev?.id === id
-          ? { ...prev, estado, pagado: estado === "COMPLETADO" }
+          ? updated
           : prev
       );
     } catch (error) {
-      console.error("Failed to update status", error);
+      toast.error(error instanceof Error ? error.message : "No se pudo actualizar la reserva");
     }
   };
 
@@ -174,6 +175,8 @@ export default function Reservas() {
 
   return (
     <Layout>
+      {error && <p role="alert" className="mb-4 rounded-lg bg-destructive/10 p-4 text-destructive">{error}</p>}
+      {loading && <p className="mb-4 text-muted-foreground">Cargando reservas…</p>}
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -360,6 +363,7 @@ export default function Reservas() {
                       Contacto
                     </TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead>Pago</TableHead>
                     <TableHead className="text-right">Pendiente</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -391,7 +395,7 @@ export default function Reservas() {
                           </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          {reserva.edad} años
+                          {reserva.birthday_children?.map(c => c.age ? `${c.age} años` : 'Sin indicar').join(', ') || 'Sin indicar'}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
                           {reserva.num_ninos}
@@ -411,6 +415,7 @@ export default function Reservas() {
                         <TableCell>
                           <StatusBadge estado={reserva.estado} />
                         </TableCell>
+                        <TableCell>{reserva.payment_status === 'paid' ? 'Señal pagada' : reserva.payment_status === 'failed' ? 'Fallido' : 'Pendiente'}</TableCell>
                         <TableCell className="text-right">
                           <span
                             className={cn(
@@ -463,7 +468,7 @@ export default function Reservas() {
       </div>
 
       <ReservaDetailModal
-        reserva={selectedReserva}
+        reserva={reservas.find(r => r.id === selectedReserva?.id) || selectedReserva}
         open={modalOpen}
         onOpenChange={setModalOpen}
         onChangeEstado={handleChangeEstado}
@@ -471,3 +476,6 @@ export default function Reservas() {
     </Layout>
   );
 }
+
+
+

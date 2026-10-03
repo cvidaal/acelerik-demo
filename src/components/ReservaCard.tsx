@@ -48,10 +48,11 @@ export function ReservaCard({ reserva, onClick }: ReservaCardProps) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
-            <span>{reserva.num_ninos} niños ({reserva.edad} años)</span>
+            <span>{reserva.num_ninos} niños · Pack {reserva.pack || 'Jungla'}</span>
           </div>
         </div>
 
+        <p className="text-sm mt-3 font-medium">Pago: {reserva.payment_status === 'paid' ? 'Señal pagada' : reserva.payment_status === 'failed' ? 'Fallido' : 'Pendiente'}</p>
         {pendiente > 0 && reserva.estado !== 'CANCELADO' && (
           <div className="mt-3 pt-3 border-t border-border/50">
             <div className="flex items-center gap-2 text-warning font-medium">

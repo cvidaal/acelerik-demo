@@ -8,8 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"acelerik-booking/internal/booking"
 	"acelerik-booking/internal/config"
+	"acelerik-booking/internal/payment"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humagin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -39,6 +43,10 @@ func main() {
 	}))
 
 	router.GET("/health", healthHandler(db, cfg.DatabaseURL))
+
+	api := humagin.New(router, huma.DefaultConfig("Acelerik Booking", "0.1.0"))
+	booking.Register(api, booking.NewService(booking.NewRepository(db)))
+	payment.Register(api, router, payment.NewService(db, cfg.StripeSecretKey, cfg.CORSOrigin), cfg.StripeWebhookSecret)
 
 	log.Printf("API listening on :%s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {

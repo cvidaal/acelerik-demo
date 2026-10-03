@@ -49,7 +49,7 @@ export function ReservaDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full gradient-accent flex items-center justify-center">
@@ -95,7 +95,7 @@ export function ReservaDetailModal({
               </div>
               <div className="flex items-center gap-3">
                 <Cake className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{reserva.edad} años</span>
+                <span className="text-sm">{reserva.birthday_children?.map(c => `${c.name}${c.age ? ` (${c.age} años)` : ''}`).join(', ') || 'Edad no indicada'}</span>
               </div>
             </div>
           </div>
@@ -136,6 +136,8 @@ export function ReservaDetailModal({
           <Separator />
 
           {/* Pago */}
+          <p className="text-sm">Pago: <strong>{reserva.payment_status === 'paid' ? 'Señal pagada' : reserva.payment_status === 'failed' ? 'Fallido' : 'Pendiente'}</strong> · Pack {reserva.pack || 'Jungla'}</p>
+          {reserva.notes && <p className="text-sm">Comentarios: {reserva.notes}</p>}
           <div className="space-y-3">
             <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
               Información de pago
@@ -192,17 +194,6 @@ export function ReservaDetailModal({
                   Cambiar estado
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {reserva.estado === 'PENDIENTE_PAGO' && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-success border-success/30 hover:bg-success/10"
-                      onClick={() => handleEstadoChange('CONFIRMADO')}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1.5" />
-                      Confirmar
-                    </Button>
-                  )}
                   {reserva.estado === 'CONFIRMADO' && (
                     <Button 
                       variant="outline" 
@@ -232,3 +223,4 @@ export function ReservaDetailModal({
     </Dialog>
   );
 }
+

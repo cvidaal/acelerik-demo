@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import { Layout } from "@/components/Layout";
 import { StatsCard } from "@/components/StatsCard";
@@ -60,8 +61,8 @@ export default function Dashboard() {
     });
 
     const ingresosMes = thisMonth
-      .filter((r) => r.estado === "COMPLETADO")
-      .reduce((acc, r) => acc + r.precio_total, 0);
+      .filter((r) => r.pagado)
+      .reduce((acc, r) => acc + r.senal_pagada, 0);
 
     return {
       cumplesHoy: cumplesHoy.length,
@@ -81,18 +82,18 @@ export default function Dashboard() {
 
   const handleChangeEstado = async (id: string, estado: EstadoReserva) => {
     try {
-      await updateReserva(id, {
+      const updated = await updateReserva(id, {
         estado,
-        pagado: estado === "COMPLETADO",
+        
       });
 
       setSelectedReserva((prev) =>
         prev?.id === id
-          ? { ...prev, estado, pagado: estado === "COMPLETADO" }
+          ? updated
           : prev
       );
     } catch (error) {
-      console.error("Failed to update status", error);
+      toast.error(error instanceof Error ? error.message : "No se pudo actualizar la reserva");
     }
   };
 
@@ -103,6 +104,8 @@ export default function Dashboard() {
 
   return (
     <Layout>
+      {error && <p role="alert" className="mb-4 rounded-lg bg-destructive/10 p-4 text-destructive">{error}</p>}
+      {loading && <p className="mb-4 text-muted-foreground">Cargando reservas…</p>}
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
@@ -149,10 +152,10 @@ export default function Dashboard() {
             icon={CalendarDays}
           />
           <StatsCard
-            title="Ingresos mes"
+            title="Señales de fiestas del mes"
             value={`${stats.ingresosMes.toFixed(0)}€`}
             icon={Euro}
-            trend={{ value: 12, isPositive: true }}
+            
           />
         </div>
 
@@ -213,7 +216,7 @@ export default function Dashboard() {
       </div>
 
       <ReservaDetailModal
-        reserva={selectedReserva}
+        reserva={reservas.find(r => r.id === selectedReserva?.id) || selectedReserva}
         open={modalOpen}
         onOpenChange={setModalOpen}
         onChangeEstado={handleChangeEstado}
@@ -221,3 +224,6 @@ export default function Dashboard() {
     </Layout>
   );
 }
+
+
+

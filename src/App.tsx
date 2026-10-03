@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Calendario from "./pages/Calendario";
 import Reservas from "./pages/Reservas";
 import NotFound from "./pages/NotFound";
+import Reservar from "./pages/Reservar";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/reservar" element={<Reservar />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/reservas" element={<Reservas />} />

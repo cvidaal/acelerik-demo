@@ -9,9 +9,11 @@ import (
 )
 
 type Config struct {
-	Port        string
-	DatabaseURL string
-	CORSOrigin  string
+	Port                string
+	DatabaseURL         string
+	CORSOrigin          string
+	StripeSecretKey     string
+	StripeWebhookSecret string
 }
 
 func Load() (Config, error) {
@@ -34,9 +36,11 @@ func Load() (Config, error) {
 	}
 
 	return Config{
-		Port:        port,
-		DatabaseURL: withSSLMode(databaseURL),
-		CORSOrigin:  origin,
+		Port:                port,
+		DatabaseURL:         withSSLMode(databaseURL),
+		CORSOrigin:          origin,
+		StripeSecretKey:     strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
+		StripeWebhookSecret: strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
 	}, nil
 }
 

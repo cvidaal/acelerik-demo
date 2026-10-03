@@ -1,67 +1,29 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Reserva } from "@/types/reserva";
-
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Booking, BookingStatus, getBookings, updateBookingStatus } from '@/api/bookings';
+import { Reserva, EstadoReserva } from '@/types/reserva';
+const states: Record<BookingStatus, EstadoReserva> = { pending: 'PENDIENTE_PAGO', confirmed: 'CONFIRMADO', cancelled: 'CANCELADO', completed: 'COMPLETADO' };
+function toReserva(b: Booking): Reserva {
+  return {
+    id: b.id, created_at: b.created_at,
+    nombre_cumpleanero: (b.birthday_children || []).map(c => c.name).join(' y ') || 'Cumpleaños',
+    nombre_reserva: b.customer_name, edad: b.birthday_children?.[0]?.age || 0,
+    fecha_reserva: b.date, hora: `${b.start_time}–${b.end_time}`, num_ninos: b.children,
+    telefono: b.customer_phone, email: b.customer_email, es_matinal: b.start_time < '15:00',
+    estado: states[b.booking_status], pagado: b.payment_status === 'paid',
+    precio_total: b.total_price / 100, precio_por_nino: b.total_price / b.children / 100,
+    senal_pagada: b.payment_status === 'paid' ? b.deposit_amount / 100 : 0,
+    payment_status: b.payment_status, pack: b.package, birthday_children: b.birthday_children || [], notes: b.notes,
+  };
+}
 export function useReservas() {
-  const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchReservas();
-  }, []);
-
-  async function fetchReservas() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.from("reservas").select("*");
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const reservasFormateadas = data.map((reserva) => ({
-          ...reserva,
-          precio_total: Number(reserva.precio_total) || 0,
-          precio_por_nino: Number(reserva.precio_por_nino) || 0,
-          senal_pagada: Number(reserva.senal_pagada) || 0,
-          num_ninos: Number(reserva.num_ninos) || 0,
-          edad: Number(reserva.edad) || 0,
-        }));
-        setReservas(reservasFormateadas as Reserva[]);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Error desconocido al cargar reservas"
-      );
-      console.error("Error fetching reservas:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  const client = useQueryClient();
+  const query = useQuery({ queryKey: ['bookings'], queryFn: getBookings, refetchInterval: 5000 });
   async function updateReserva(id: string, updates: Partial<Reserva>) {
-    try {
-      const { error } = await supabase
-        .from("reservas")
-        .update(updates)
-        .eq("id", id);
-
-      if (error) throw error;
-
-      // Optimistic update
-      setReservas((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
-      );
-    } catch (err) {
-      console.error("Error updating reserva:", err);
-      // Revert or show error
-      throw err;
-    }
+    const status = Object.entries(states).find(([, value]) => value === updates.estado)?.[0] as BookingStatus | undefined;
+    if (!status) throw new Error('Selecciona un estado válido');
+    const updated = await updateBookingStatus(id, status);
+    await client.invalidateQueries({ queryKey: ['bookings'] });
+    return toReserva(updated);
   }
-
-  return { reservas, loading, error, refetch: fetchReservas, updateReserva };
+  return { reservas: (query.data || []).map(toReserva), loading: query.isLoading, error: query.error?.message || null, refetch: query.refetch, updateReserva };
 }

@@ -17,6 +17,10 @@ export interface Reserva {
   precio_total: number;
   precio_por_nino: number;
   senal_pagada: number;
+  payment_status?: 'pending' | 'paid' | 'failed';
+  pack?: string;
+  birthday_children?: { name: string; age?: number }[];
+  notes?: string;
 }
 
 export interface ReservaFilters {
