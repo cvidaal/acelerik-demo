@@ -38,8 +38,8 @@ export function AppSidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
-            <img src="../../public/favicon.ico" alt="Logo Jungla Mágica" />
+          <div className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center">
+            <img src="/favicon.ico" alt="Logo Jungla Mágica" className="w-10 h-10 object-contain" />
           </div>
           <div>
             <h1 className="font-bold text-sidebar-foreground">Jungla Mágica</h1>
