@@ -60,6 +60,6 @@ Demo local para un solo parque: pack Jungla, franjas fijas, tres fiestas por fra
 
 Las reservas sin Checkout caducan después de una hora cuando se consulta el API. Stripe Checkout caduca una hora después de crear la reserva; solo se inicia mientras queden al menos 31 minutos. Su webhook de expiración cancela la reserva. Cancelar no reembolsa; un pago tardío se registra sin reactivar una fiesta cancelada.
 
-El panel y los endpoints de gestión todavía no tienen autenticación. Mantén esta demo local y usa datos de prueba; antes de publicar para clientes reales hay que proteger el acceso del negocio.
+En desarrollo local, el acceso continúa abierto si no configuras DEMO_USERNAME y DEMO_PASSWORD. Para publicar la demo privada, consulta [DEPLOY.md](DEPLOY.md): el despliegue sirve React y Go juntos y exige credenciales para todo el recorrido. No es todavía una aplicación para reservas reales.
 
 Cuando el recorrido completo esté verificado, el siguiente paso es enseñarlo a negocios, no añadir nuevas funcionalidades.

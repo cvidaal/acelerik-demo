@@ -10,6 +10,7 @@ import (
 
 	"acelerik-booking/internal/booking"
 	"acelerik-booking/internal/config"
+	"acelerik-booking/internal/demo"
 	"acelerik-booking/internal/payment"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -36,6 +37,7 @@ func main() {
 	db.SetConnMaxLifetime(30 * time.Minute)
 
 	router := gin.Default()
+	router.Use(demo.Access(cfg.DemoUsername, cfg.DemoPassword))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{cfg.CORSOrigin},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodOptions},
@@ -47,6 +49,11 @@ func main() {
 	api := humagin.New(router, huma.DefaultConfig("Acelerik Booking", "0.1.0"))
 	booking.Register(api, booking.NewService(booking.NewRepository(db)))
 	payment.Register(api, router, payment.NewService(db, cfg.StripeSecretKey, cfg.CORSOrigin), cfg.StripeWebhookSecret)
+	if cfg.StaticDir != "" {
+		if err := demo.ServeFrontend(router, cfg.StaticDir); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	log.Printf("API listening on :%s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {

@@ -13,7 +13,7 @@ export interface Availability {
   package: string; price_per_child: number; deposit_amount: number; max_children: number;
 }
 export type CreateBooking = Pick<Booking, 'customer_name' | 'customer_email' | 'customer_phone' | 'date' | 'start_time' | 'children' | 'package' | 'birthday_children' | 'notes'>;
-const base = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/$/, '');
+const base = (import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? '' : 'http://localhost:8081')).replace(/\/$/, '');
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${base}${path}`, { ...init, headers: { 'Content-Type': 'application/json', ...init?.headers } });
   const data = await response.json();

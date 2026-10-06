@@ -17,6 +17,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <div className="bg-primary/10 px-4 py-2 text-center text-xs text-primary" role="note">Demo Acelerik · Usa datos ficticios. Los pagos son de prueba y no reservan una fiesta real.</div>
         <Routes>
           <Route path="/reservar" element={<Reservar />} />
           <Route path="/" element={<Dashboard />} />

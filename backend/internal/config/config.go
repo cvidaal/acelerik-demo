@@ -14,6 +14,9 @@ type Config struct {
 	CORSOrigin          string
 	StripeSecretKey     string
 	StripeWebhookSecret string
+	StaticDir           string
+	DemoUsername        string
+	DemoPassword        string
 }
 
 func Load() (Config, error) {
@@ -34,6 +37,15 @@ func Load() (Config, error) {
 	if origin == "" {
 		origin = "http://localhost:8080"
 	}
+	staticDir := strings.TrimSpace(os.Getenv("STATIC_DIR"))
+	username := strings.TrimSpace(os.Getenv("DEMO_USERNAME"))
+	password := os.Getenv("DEMO_PASSWORD")
+	if (username == "") != (password == "") {
+		return Config{}, fmt.Errorf("DEMO_USERNAME and DEMO_PASSWORD must be set together")
+	}
+	if staticDir != "" && (username == "" || len(password) < 16) {
+		return Config{}, fmt.Errorf("hosted demo requires DEMO_USERNAME and DEMO_PASSWORD (at least 16 characters)")
+	}
 
 	return Config{
 		Port:                port,
@@ -41,6 +53,9 @@ func Load() (Config, error) {
 		CORSOrigin:          origin,
 		StripeSecretKey:     strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
 		StripeWebhookSecret: strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
+		StaticDir:           staticDir,
+		DemoUsername:        username,
+		DemoPassword:        password,
 	}, nil
 }
 
