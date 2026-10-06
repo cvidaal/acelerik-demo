@@ -16,7 +16,19 @@ docker build -t acelerik-demo .
 
 El contenedor escucha en PORT (8081 por defecto). El proveedor debe dirigir el tráfico HTTPS a ese puerto. Health check: GET /health.
 
-## Vercel
+## Render gratuito (opción elegida para la demo)
+
+El archivo `render.yaml` prepara un único Web Service Docker en Frankfurt, con plan Free y la rama `codex/deploy-demo`. No crea otra base de datos. En Render se puede importar mediante New → Blueprint, seleccionando este repositorio y esa rama.
+
+Render solicita DATABASE_URL, STRIPE_SECRET_KEY y CORS_ORIGIN sin guardar sus valores en Git. Genera una DEMO_PASSWORD aleatoria; DEMO_USERNAME es demo. Si el servicio recibe una URL diferente de la prevista, actualizar CORS_ORIGIN con su URL HTTPS exacta y volver a desplegar antes de probar Checkout.
+
+Después de publicar, registrar el webhook HTTPS de Stripe siguiendo la sección de abajo y configurar STRIPE_WEBHOOK_SECRET en Render. Hasta entonces no se confirma ningún pago online.
+
+El servicio Free se duerme tras 15 minutos sin tráfico y puede tardar alrededor de un minuto en arrancar. Abrir la página y esperar antes de grabar. Es una demo de prueba: no utilizar este plan para operar reservas reales. No hace falta añadir una tarjeta para empezar; si se superan las cuotas sin método de pago, Render puede suspender el servicio o las construcciones.
+
+Referencia: https://render.com/docs/free
+
+## Vercel (alternativa)
 
 Crear un proyecto nuevo llamado `acelerik-demo` conectado a este repositorio. La web principal acelerik.com tiene su propio proyecto. La raíz de la demo es la raíz del repositorio.
 
