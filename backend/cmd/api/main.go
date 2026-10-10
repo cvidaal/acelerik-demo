@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -55,8 +56,13 @@ func main() {
 		}
 	}
 
-	log.Printf("API listening on :%s", cfg.Port)
-	if err := router.Run(":" + cfg.Port); err != nil {
+	address := "0.0.0.0:" + cfg.Port
+	listener, err := net.Listen("tcp4", address)
+	if err != nil {
+		log.Fatalf("cannot bind API port: %v", err)
+	}
+	log.Printf("API listening on %s", listener.Addr())
+	if err := http.Serve(listener, router); err != nil {
 		log.Fatal(err)
 	}
 }
